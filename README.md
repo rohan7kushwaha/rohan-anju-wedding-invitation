@@ -16,7 +16,7 @@ Requirements: Python 3.10 or newer. No packages need to be installed.
 1. Copy `.env.example` to `.env`.
 2. Replace `WEDDING_ADMIN_PASSWORD` with a unique password of at least 16 characters.
 3. Run `py server.py` from this folder.
-4. Open `http://127.0.0.1:8000`.
+4. Open `http://127.0.0.1:18000`.
 5. On the server PC, open `http://127.0.0.1:8001/admin`. The browser will ask for the username `admin` and the password from `.env`.
 
 To open the admin dashboard from another device on the trusted home network, use the server PC's private IPv4 address, for example `http://192.168.1.25:8001/admin`. Do not port-forward port 8001 or route it through Cloudflare. Keep the `.env` file and `data/wishes.sqlite3` private.
@@ -36,13 +36,13 @@ py -m unittest discover -s tests -v
 - `admin.html` and `GET /api/admin/wishes` are served only by the LAN admin listener on port 8001. That listener checks for a private-network client and HTTP Basic Authentication.
 - The database is stored at `data/wishes.sqlite3` by default. It is ignored by Git. Back it up securely and keep exports private because wishes contain personal information.
 - The form tells guests their wish will be saved for the couple to read. The Python server does not log guest IP addresses or wish contents.
-- A Cloudflare Tunnel should point only to `http://127.0.0.1:8000`. Do not add port 8001 to its ingress configuration. Allow port 8001 through Windows Firewall only on the Private profile and LocalSubnet if LAN devices need admin access.
+- A Cloudflare Tunnel should point only to `http://127.0.0.1:18000`. Do not add port 8001 to its ingress configuration. Allow port 8001 through Windows Firewall only on the Private profile and LocalSubnet if LAN devices need admin access.
 
 ## Deploying behind Cloudflare
 
 1. Confirm the domain is managed by Cloudflare and install `cloudflared` on the Windows server PC.
 2. Create a named Cloudflare Tunnel and route the chosen public hostname to it.
-3. Configure the tunnel's public ingress to forward the hostname to `http://127.0.0.1:8000`, followed by a catch-all `http_status:404` rule. Keep the tunnel credentials and config outside this repository.
+3. Configure the tunnel's public ingress to forward the hostname to `http://127.0.0.1:18000`, followed by a catch-all `http_status:404` rule. Keep the tunnel credentials and config outside this repository.
 4. Run `py server.py` on the server PC, then run the named tunnel with `cloudflared tunnel run <TUNNEL-NAME>`.
 5. If devices on the home network need admin access, run this in an elevated PowerShell window to allow the admin port only from the Private profile and local subnet:
 
