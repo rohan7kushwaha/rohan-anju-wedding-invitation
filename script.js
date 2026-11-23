@@ -97,6 +97,7 @@ const pageContent = [...document.body.children].filter(element =>
 );
 
 document.body.classList.add('intro-locked');
+backgroundMusic.pause();
 pageContent.forEach(element => {
   element.inert = true;
   element.setAttribute('aria-hidden', 'true');
@@ -110,6 +111,8 @@ function showContinue(message) {
 }
 
 function playLaunchMusic() {
+  if (introGate.classList.contains('is-dismissed')) return;
+  if (!backgroundMusic.paused) backgroundMusic.pause();
   if (!launchMusic.paused) return;
   const playAttempt = launchMusic.play();
   if (playAttempt) {
@@ -173,11 +176,11 @@ function openInvitation() {
   launchMusic.pause();
   launchMusic.currentTime = 0;
   const shouldPlayMusic = musicPreference !== false;
-  backgroundMusic.pause();
   backgroundMusic.src = invitationMusicSource;
   backgroundMusic.load();
   if (shouldPlayMusic) {
     musicPreference = true;
+    launchMusic.pause();
     playBackgroundMusic();
   }
   pageContent.forEach(element => {
@@ -235,6 +238,8 @@ function updateMusicToggle() {
 }
 
 function playBackgroundMusic() {
+  launchMusic.pause();
+  launchMusic.currentTime = 0;
   const playAttempt = backgroundMusic.play();
   if (playAttempt) {
     playAttempt.catch(error => {
