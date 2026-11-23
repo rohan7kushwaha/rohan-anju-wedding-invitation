@@ -6,8 +6,8 @@
       "id": "haldi",
       "name": "Haldi",
       "date": "2026-12-23",
-      "time": null,
-      "timeLabel": null,
+      "time": "15:00",
+      "timeLabel": "3 PM onwards",
       "locationId": "groomsHome",
       "video": "assets/Video/haldi.mp4"
     },
@@ -24,8 +24,8 @@
       "id": "sangeet",
       "name": "Sangeet",
       "date": "2026-12-24",
-      "time": null,
-      "timeLabel": null,
+      "time": "18:00",
+      "timeLabel": "6 PM onwards",
       "locationId": "groomsHome",
       "video": "assets/Video/sangeet.mp4"
     },
