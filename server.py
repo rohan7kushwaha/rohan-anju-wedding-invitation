@@ -287,7 +287,7 @@ def parse_arguments():
     parser.add_argument("--public-host", default=os.environ.get("WEDDING_PUBLIC_HOST", "127.0.0.1"))
     parser.add_argument("--public-port", type=int, default=int(os.environ.get("WEDDING_PUBLIC_PORT", "18000")))
     parser.add_argument("--admin-host", default=os.environ.get("WEDDING_ADMIN_HOST", "0.0.0.0"))
-    parser.add_argument("--admin-port", type=int, default=int(os.environ.get("WEDDING_ADMIN_PORT", "8001")))
+    parser.add_argument("--admin-port", type=int, default=int(os.environ.get("WEDDING_ADMIN_PORT", "18001")))
     return parser.parse_args()
 
 

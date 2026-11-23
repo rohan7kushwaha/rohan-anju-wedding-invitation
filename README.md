@@ -17,11 +17,11 @@ Requirements: Python 3.10 or newer. No packages need to be installed.
 2. Replace `WEDDING_ADMIN_PASSWORD` with a unique password of at least 16 characters.
 3. Run `py server.py` from this folder.
 4. Open `http://127.0.0.1:18000`.
-5. On the server PC, open `http://127.0.0.1:8001/admin`. The browser will ask for the username `admin` and the password from `.env`.
+5. On the server PC, open `http://127.0.0.1:18001/admin`. The browser will ask for the username `admin` and the password from `.env`.
 
-To open the admin dashboard from another device on the trusted home network, use the server PC's private IPv4 address, for example `http://192.168.1.25:8001/admin`. Do not port-forward port 8001 or route it through Cloudflare. Keep the `.env` file and `data/wishes.sqlite3` private.
+To open the admin dashboard from another device on the trusted home network, use the server PC's private IPv4 address, for example `http://192.168.1.25:18001/admin`. Do not port-forward port 18001 or route it through Cloudflare. Keep the `.env` file and `data/wishes.sqlite3` private.
 
-The admin listener uses HTTP on the LAN. Use it only on a trusted, password-protected home network; do not use it over public Wi-Fi. If admin access is ever needed from an untrusted network, add a VPN or an HTTPS-protected access layer rather than exposing port 8001.
+The admin listener uses HTTP on the LAN. Use it only on a trusted, password-protected home network; do not use it over public Wi-Fi. If admin access is ever needed from an untrusted network, add a VPN or an HTTPS-protected access layer rather than exposing port 18001.
 
 Run the focused server tests with:
 
@@ -33,10 +33,10 @@ py -m unittest discover -s tests -v
 
 - `POST /api/wishes` accepts validated guest submissions. Wishes are not stored in a visitor's browser.
 - The public server does not expose a wishes-list endpoint or the admin page.
-- `admin.html` and `GET /api/admin/wishes` are served only by the LAN admin listener on port 8001. That listener checks for a private-network client and HTTP Basic Authentication.
+- `admin.html` and `GET /api/admin/wishes` are served only by the LAN admin listener on port 18001. That listener checks for a private-network client and HTTP Basic Authentication.
 - The database is stored at `data/wishes.sqlite3` by default. It is ignored by Git. Back it up securely and keep exports private because wishes contain personal information.
 - The form tells guests their wish will be saved for the couple to read. The Python server does not log guest IP addresses or wish contents.
-- A Cloudflare Tunnel should point only to `http://127.0.0.1:18000`. Do not add port 8001 to its ingress configuration. Allow port 8001 through Windows Firewall only on the Private profile and LocalSubnet if LAN devices need admin access.
+- A Cloudflare Tunnel should point only to `http://127.0.0.1:18000`. Do not add port 18001 to its ingress configuration. Allow port 18001 through Windows Firewall only on the Private profile and LocalSubnet if LAN devices need admin access.
 
 ## Deploying behind Cloudflare
 
@@ -47,7 +47,7 @@ py -m unittest discover -s tests -v
 5. If devices on the home network need admin access, run this in an elevated PowerShell window to allow the admin port only from the Private profile and local subnet:
 
    ```powershell
-   New-NetFirewallRule -DisplayName "Wedding Wishes Admin LAN" -Direction Inbound -Protocol TCP -LocalPort 8001 -Action Allow -Profile Private -RemoteAddress LocalSubnet
+   New-NetFirewallRule -DisplayName "Wedding Wishes Admin LAN" -Direction Inbound -Protocol TCP -LocalPort 18001 -Action Allow -Profile Private -RemoteAddress LocalSubnet
    ```
 
 6. Configure Cloudflare rate limiting for `POST /api/wishes` to reduce spam. The public form is intentionally writable; the wishes list and admin port are not public.
