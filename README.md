@@ -19,6 +19,10 @@ Requirements: Python 3.10 or newer. No packages need to be installed.
 4. Open `http://127.0.0.1:18000`.
 5. On the server PC, open `http://127.0.0.1:18001/admin`. The browser will ask for the username `admin` and the password from `.env`.
 
+## Editing invitation details
+
+Update names and family blessings in `assets/Event Details/Member.json`, event names/dates/times in `assets/Event Details/EventDate.json`, and locations/routes in `assets/Event Details/Location.json`. The public HTML and JavaScript render these JSON values instead of maintaining duplicate hardcoded names or dates.
+
 To open the admin dashboard from another device on the trusted home network, use the server PC's private IPv4 address, for example `http://192.168.1.25:18001/admin`. Do not port-forward port 18001 or route it through Cloudflare. Keep the `.env` file and `data/wishes.sqlite3` private.
 
 The admin listener uses HTTP on the LAN. Use it only on a trusted, password-protected home network; do not use it over public Wi-Fi. If admin access is ever needed from an untrusted network, add a VPN or an HTTPS-protected access layer rather than exposing port 18001.

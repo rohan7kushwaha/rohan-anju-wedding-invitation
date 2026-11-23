@@ -419,11 +419,26 @@ const eventVideoObserver = 'IntersectionObserver' in window && !prefersReducedMo
   }, { threshold: 0.55 })
   : null;
 
-function renderEvents(events, locations) {
+function renderEvents(events, locationData, weddingEventId) {
+  const locations = locationData.locations || {};
   const list = document.getElementById('eventList');
   const routeJourney = document.getElementById('routeJourney');
   routeJourney.hidden = true;
   list.replaceChildren();
+
+  const route = locationData.route;
+  if (route) {
+    document.getElementById('routeJourneyEyebrow').textContent = route.eyebrow || '';
+    document.getElementById('routeJourneyHeading').replaceChildren(
+      document.createTextNode(route.headingFrom || route.from || ''),
+      Object.assign(document.createElement('span'), { textContent: ' to ' }),
+      document.createTextNode(route.headingTo || route.to || '')
+    );
+    document.getElementById('routeFromLabel').textContent = route.fromLabel || 'From';
+    document.getElementById('routeFrom').textContent = route.from || '';
+    document.getElementById('routeToLabel').textContent = route.toLabel || 'To';
+    document.getElementById('routeTo').textContent = route.to || '';
+  }
 
   events.forEach((event, index) => {
     const card = document.createElement('article');
@@ -519,23 +534,28 @@ function renderEvents(events, locations) {
     observeForReveal(card, Math.min(index, 3) * 80);
   });
 
-  const marriageIndex = events.findIndex(event => event.id === 'marriage');
-  if (marriageIndex >= 0) {
-    const marriageCard = list.children[marriageIndex];
-    marriageCard.before(routeJourney);
-  } else {
-    list.append(routeJourney);
+  const weddingIndex = events.findIndex(event => event.id === weddingEventId);
+  if (route) {
+    if (weddingIndex >= 0) {
+      list.children[weddingIndex].before(routeJourney);
+    } else {
+      list.append(routeJourney);
+    }
   }
+  if (!route) return;
   routeJourney.hidden = false;
   initializeJourneyAnimation(routeJourney);
 }
 
 function renderFamily(members) {
-  document.title = `${members.groom.name} & ${members.bride.name} — The Wedding Journey`;
+  const titleSuffix = members.page?.titleSuffix || 'Wedding Invitation';
+  document.title = `${members.groom.name} & ${members.bride.name} — ${titleSuffix}`;
   document.querySelector('meta[name="description"]').content =
     `Wedding invitation and celebration details for ${members.groom.name} and ${members.bride.name}.`;
   document.getElementById('heroGroomName').textContent = members.groom.name;
   document.getElementById('heroBrideName').textContent = members.bride.name;
+  document.getElementById('brandNames').textContent =
+    `${members.groom.name.charAt(0)} & ${members.bride.name.charAt(0)}`;
   document.getElementById('groomName').textContent = members.groom.name;
   document.getElementById('groomParents').textContent = members.groom.parents.join(' & ');
   document.getElementById('brideName').textContent = members.bride.name;
@@ -543,6 +563,8 @@ function renderFamily(members) {
   document.getElementById('footerGroomName').textContent = members.groom.name;
   document.getElementById('footerBrideName').textContent = members.bride.name;
   document.getElementById('wishesCoupleNames').textContent = `${members.groom.name} and ${members.bride.name}`;
+  document.querySelector('.thank-you-seal span').textContent =
+    `${members.groom.name.charAt(0)}&${members.bride.name.charAt(0)}`;
 
   const blessings = document.getElementById('blessingsList');
   blessings.replaceChildren();
@@ -611,10 +633,12 @@ async function loadTemplateData() {
       return response.json();
     })
   ]);
-  const wedding = eventData.events.find(event => event.id === 'marriage');
-  if (!wedding) throw new Error('EventDate.json must include an event with id "marriage".');
+  const weddingEventId = eventData.weddingEventId;
+  if (!weddingEventId) throw new Error('EventDate.json must include weddingEventId.');
+  const wedding = eventData.events.find(event => event.id === weddingEventId);
+  if (!wedding) throw new Error(`EventDate.json must include an event with id "${weddingEventId}".`);
 
-  renderEvents(eventData.events, locationData.locations);
+  renderEvents(eventData.events, locationData, weddingEventId);
   renderFamily(memberData);
   renderWeddingDate(wedding);
   document.getElementById('eventDataStatus').hidden = true;

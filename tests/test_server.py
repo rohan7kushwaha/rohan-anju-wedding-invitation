@@ -52,7 +52,9 @@ class WeddingServerTests(unittest.TestCase):
     def test_public_port_serves_site_but_not_admin_or_server_files(self):
         with self.request(self.public_server, "/") as response:
             self.assertEqual(response.status, 200)
-            self.assertIn(b"Wedding Journey", response.read())
+            response_body = response.read()
+            self.assertIn(b'id="brandNames"', response_body)
+            self.assertIn(b'id="heroGroomName"', response_body)
 
         for path in ("/admin", "/admin.html", "/server.py", "/.env.example", "/api/admin/wishes"):
             with self.subTest(path=path):

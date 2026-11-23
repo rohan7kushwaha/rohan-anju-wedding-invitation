@@ -1,5 +1,14 @@
 {
   "schemaVersion": 1,
+  "route": {
+    "eyebrow": "The journey continues",
+    "headingFrom": "KANDAR",
+    "headingTo": "Chhaterpur",
+    "fromLabel": "From",
+    "toLabel": "To",
+    "from": "Kandar",
+    "to": "Chhaterpur"
+  },
   "locations": {
     "groomsHome": {
       "name": "Groom's Home",

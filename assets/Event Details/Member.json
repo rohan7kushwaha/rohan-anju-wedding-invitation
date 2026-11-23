@@ -1,5 +1,8 @@
 {
   "schemaVersion": 1,
+  "page": {
+    "titleSuffix": "The Wedding Journey"
+  },
   "groom": {
     "name": "Rohan",
     "parents": [
