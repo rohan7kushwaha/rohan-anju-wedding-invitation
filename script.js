@@ -92,6 +92,7 @@ const musicToggle = document.getElementById('musicToggle');
 const musicStatus = document.getElementById('musicStatus');
 const invitationMusicSource = 'assets/music/invitation.mp3';
 let musicPreference = null;
+let launchMusicLocked = false;
 const pageContent = [...document.body.children].filter(element =>
   element !== introGate && element !== musicToggle
 );
@@ -111,11 +112,17 @@ function showContinue(message) {
 }
 
 function playLaunchMusic() {
-  if (introGate.classList.contains('is-dismissed')) return;
+  if (launchMusicLocked || introGate.classList.contains('is-dismissed')) return;
   if (!backgroundMusic.paused) backgroundMusic.pause();
   if (!launchMusic.paused) return;
   const playAttempt = launchMusic.play();
   if (playAttempt) {
+    playAttempt.then(() => {
+      if (launchMusicLocked) {
+        launchMusic.pause();
+        launchMusic.currentTime = 0;
+      }
+    });
     playAttempt.catch(error => {
       console.warn('Launch music is waiting for an interaction to start.', error);
     });
@@ -171,6 +178,8 @@ if (prefersReducedMotion) {
 }
 
 function openInvitation() {
+  launchMusicLocked = true;
+  introGate.classList.add('is-dismissed');
   launchVideo.pause();
   launchVideoBackdrop.pause();
   launchMusic.pause();
@@ -190,7 +199,6 @@ function openInvitation() {
   document.body.classList.remove('intro-locked');
   document.body.classList.add('invitation-opened');
   startHeartEffects();
-  introGate.classList.add('is-dismissed');
   window.setTimeout(() => introGate.remove(), 550);
 }
 
@@ -229,7 +237,9 @@ inviteButton.addEventListener('click', event => {
 });
 
 function updateMusicToggle() {
-  const isPlaying = !backgroundMusic.paused;
+  const isLaunchPhase = !introGate.classList.contains('is-dismissed');
+  const activeMusic = isLaunchPhase ? launchMusic : backgroundMusic;
+  const isPlaying = !activeMusic.paused;
   musicToggle.classList.toggle('is-muted', !isPlaying);
   musicToggle.classList.toggle('is-playing', isPlaying);
   musicToggle.setAttribute('aria-pressed', String(isPlaying));
@@ -251,6 +261,17 @@ function playBackgroundMusic() {
 }
 
 musicToggle.addEventListener('click', () => {
+  if (!introGate.classList.contains('is-dismissed')) {
+    musicPreference = launchMusic.paused;
+    if (musicPreference) {
+      playLaunchMusic();
+    } else {
+      launchMusic.pause();
+    }
+    updateMusicToggle();
+    return;
+  }
+
   musicPreference = backgroundMusic.paused;
   if (musicPreference) {
     playBackgroundMusic();
@@ -259,8 +280,20 @@ musicToggle.addEventListener('click', () => {
   }
   updateMusicToggle();
 });
-backgroundMusic.addEventListener('play', updateMusicToggle);
+backgroundMusic.addEventListener('play', () => {
+  launchMusic.pause();
+  launchMusic.currentTime = 0;
+  updateMusicToggle();
+});
 backgroundMusic.addEventListener('pause', updateMusicToggle);
+launchMusic.addEventListener('play', () => {
+  updateMusicToggle();
+  if (launchMusicLocked) {
+    launchMusic.pause();
+    launchMusic.currentTime = 0;
+  }
+});
+launchMusic.addEventListener('pause', updateMusicToggle);
 backgroundMusic.addEventListener('error', () => {
   musicStatus.textContent = 'Music could not be loaded. Check that assets/music/invitation.mp3 exists and is a valid MP3.';
   console.error('Unable to load background music from assets/music/invitation.mp3.', backgroundMusic.error);
