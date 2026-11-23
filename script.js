@@ -93,7 +93,6 @@ const musicStatus = document.getElementById('musicStatus');
 const invitationMusicSource = 'assets/music/invitation.mp3';
 let musicPreference = null;
 let launchMusicLocked = false;
-let launchTogglePrimed = false;
 const pageContent = [...document.body.children].filter(element =>
   element !== introGate && element !== musicToggle
 );
@@ -150,12 +149,6 @@ document.addEventListener('keydown', () => {
   launchMusic.muted = false;
   playLaunchMusic();
 }, { once: true });
-
-musicToggle.addEventListener('pointerdown', () => {
-  if (!introGate.classList.contains('is-dismissed')) {
-    launchTogglePrimed = true;
-  }
-});
 
 launchVideo.addEventListener('play', () => {
   startLaunchMusicAutomatically();
@@ -289,16 +282,9 @@ function playBackgroundMusic() {
 
 musicToggle.addEventListener('click', () => {
   if (!introGate.classList.contains('is-dismissed')) {
-    if (launchTogglePrimed) {
-      launchTogglePrimed = false;
-      musicPreference = true;
-      launchMusic.muted = false;
-      playLaunchMusic();
-      updateMusicToggle();
-      return;
-    }
-    musicPreference = launchMusic.paused;
+    musicPreference = launchMusic.paused || launchMusic.muted;
     if (musicPreference) {
+      launchMusic.muted = false;
       playLaunchMusic();
     } else {
       launchMusic.pause();
