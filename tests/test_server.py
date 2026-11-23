@@ -10,9 +10,9 @@ from urllib.request import Request, urlopen
 from server import (
     WeddingHTTPServer,
     WeddingRequestHandler,
-    initialize_database,
     make_admin_handler,
 )
+from wedding.database import initialize_database
 
 
 class WeddingServerTests(unittest.TestCase):

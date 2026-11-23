@@ -1,0 +1,1 @@
+"""Wedding invitation application package."""

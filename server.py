@@ -6,6 +6,7 @@ import json
 import logging
 import os
 import sqlite3
+import sys
 import threading
 from contextlib import closing
 from datetime import datetime, timezone
@@ -16,54 +17,13 @@ from urllib.parse import unquote, urlsplit
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 ASSETS_ROOT = (PROJECT_ROOT / "assets").resolve()
+sys.path.insert(0, str(PROJECT_ROOT / "src"))
+
+from wedding.config import database_path_from_environment, load_local_environment
+from wedding.database import initialize_database
+
 MAX_REQUEST_BYTES = 8192
 NOT_PUBLIC_FILE = PROJECT_ROOT / "__not_public__"
-
-
-def load_local_environment():
-    env_file = PROJECT_ROOT / ".env"
-    if not env_file.exists():
-        return
-
-    for line_number, raw_line in enumerate(env_file.read_text(encoding="utf-8").splitlines(), start=1):
-        line = raw_line.strip()
-        if not line or line.startswith("#"):
-            continue
-
-        key, separator, value = line.partition("=")
-        key = key.strip()
-        if not separator or not key:
-            raise RuntimeError(f"Invalid .env entry on line {line_number}.")
-
-        value = value.strip()
-        if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
-            value = value[1:-1]
-        os.environ.setdefault(key, value)
-
-
-def database_path_from_environment():
-    configured_path = Path(os.environ.get("WEDDING_DB_PATH", "data/wishes.sqlite3"))
-    if not configured_path.is_absolute():
-        configured_path = PROJECT_ROOT / configured_path
-    return configured_path.resolve()
-
-
-def initialize_database(database_path):
-    database_path.parent.mkdir(parents=True, exist_ok=True)
-    with closing(sqlite3.connect(database_path, timeout=10)) as connection:
-        connection.execute("PRAGMA journal_mode = WAL")
-        connection.execute(
-            """
-            CREATE TABLE IF NOT EXISTS wishes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                city TEXT NOT NULL,
-                message TEXT NOT NULL,
-                created_at TEXT NOT NULL
-            )
-            """
-        )
-        connection.commit()
 
 
 def clean_text(value, field_name, maximum_length, required):
@@ -292,13 +252,13 @@ def parse_arguments():
 
 
 def main():
-    load_local_environment()
+    load_local_environment(PROJECT_ROOT)
     arguments = parse_arguments()
     admin_password = os.environ.get("WEDDING_ADMIN_PASSWORD", "")
     if len(admin_password) < 16 or admin_password == "replace-with-a-long-random-password":
         raise SystemExit("Set WEDDING_ADMIN_PASSWORD to a unique password of at least 16 characters.")
 
-    database_path = database_path_from_environment()
+    database_path = database_path_from_environment(PROJECT_ROOT)
     initialize_database(database_path)
 
     public_server = WeddingHTTPServer(

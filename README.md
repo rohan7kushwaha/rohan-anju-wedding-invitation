@@ -9,6 +9,36 @@ A self-hosted wedding invitation site with local wedding media and a private, se
 - A separate admin dashboard shows and exports wishes. It requires an admin password and is restricted to the server's private network.
 - The public site is served by a small Python server using only the Python standard library.
 
+## Project structure
+
+```text
+Wedding_Program/
+  assets/
+    event-details/
+    images/
+    music/
+    Video/
+  src/wedding/
+    config.py
+    database.py
+  tests/
+  admin.html
+  index.html
+  style.css
+  script.js
+  server.py
+  pyproject.toml
+  .env.example
+  README.md
+```
+
+- `server.py` is the local/server entry point.
+- `src/wedding/config.py` contains environment and database-path configuration.
+- `src/wedding/database.py` owns SQLite initialization.
+- `assets/event-details/*.json` is the source for names, family blessings, events, dates, times, locations, and route text.
+- `data/wishes.sqlite3` is runtime-only data and is never committed.
+- `tests/` contains HTTP integration tests for public routes, wishes, and the LAN admin boundary.
+
 ## Local development
 
 Requirements: Python 3.10 or newer. No packages need to be installed.
@@ -21,7 +51,7 @@ Requirements: Python 3.10 or newer. No packages need to be installed.
 
 ## Editing invitation details
 
-Update names and family blessings in `assets/Event Details/Member.json`, event names/dates/times in `assets/Event Details/EventDate.json`, and locations/routes in `assets/Event Details/Location.json`. The public HTML and JavaScript render these JSON values instead of maintaining duplicate hardcoded names or dates.
+Update names and family blessings in `assets/event-details/Member.json`, event names/dates/times in `assets/event-details/EventDate.json`, and locations/routes in `assets/event-details/Location.json`. The public HTML and JavaScript render these JSON values instead of maintaining duplicate hardcoded names or dates.
 
 To open the admin dashboard from another device on the trusted home network, use the server PC's private IPv4 address, for example `http://192.168.1.25:18001/admin`. Do not port-forward port 18001 or route it through Cloudflare. Keep the `.env` file and `data/wishes.sqlite3` private.
 

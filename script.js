@@ -618,7 +618,7 @@ function renderWeddingDate(wedding) {
 }
 
 async function loadTemplateData() {
-  const basePath = 'assets/Event%20Details/';
+  const basePath = 'assets/event-details/';
   const [eventData, locationData, memberData] = await Promise.all([
     fetch(`${basePath}EventDate.json`, { cache: 'no-store' }).then(response => {
       if (!response.ok) throw new Error(`EventDate.json returned HTTP ${response.status}`);
