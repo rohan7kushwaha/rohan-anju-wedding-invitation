@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "events": [
+    {
+      "id": "haldi",
+      "name": "Haldi",
+      "date": "2026-12-23",
+      "time": null,
+      "timeLabel": null,
+      "locationId": "groomsHome",
+      "video": "assets/Video/haldi.mp4"
+    },
+    {
+      "id": "mehndi",
+      "name": "Mehndi",
+      "date": "2026-12-24",
+      "time": "12:00",
+      "timeLabel": "12 PM onwards",
+      "locationId": "groomsHome",
+      "video": "assets/Video/mehendi.mp4"
+    },
+    {
+      "id": "sangeet",
+      "name": "Sangeet",
+      "date": "2026-12-24",
+      "time": null,
+      "timeLabel": null,
+      "locationId": "groomsHome",
+      "video": "assets/Video/sangeet.mp4"
+    },
+    {
+      "id": "marriage",
+      "name": "Marriage Ceremony",
+      "date": "2026-12-25",
+      "time": "18:00",
+      "timeLabel": "6:00 PM onwards",
+      "locationId": "bridesHome",
+      "video": "assets/Video/wedding.mp4"
+    }
+  ]
+}

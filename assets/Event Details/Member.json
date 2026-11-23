@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "groom": {
+    "name": "Rohan",
+    "parents": [
+      "Smt. Vimala Devi",
+      "Shri Manoj Kushwaha"
+    ]
+  },
+  "bride": {
+    "name": "Anju",
+    "parents": [
+      "Smt. Sunaina Devi",
+      "Shri Mahesh Singh Kushwaha"
+    ]
+  },
+  "blessings": [
+    {
+      "relationship": "Grandparents",
+      "names": [
+        [
+          "Late Hira Devi",
+          "Shri Ram Murant Singh Kushwaha"
+        ]
+      ]
+    },
+    {
+      "relationship": "Chacha & Chachi",
+      "names": [
+        [
+          "Shri Shravan Singh Kushwaha",
+          "Smt. Manju Devi"
+        ],
+        [
+          "Shri Ravindra Sigh Kushwaha",
+          "Smt. Meena Kushwaha"
+        ]
+      ]
+    },
+    {
+      "relationship": "Bhabhi & Brother",
+      "names": [
+        [
+          "Archana Kushwaha",
+          "Rahul Kushwaha"
+        ]
+      ]
+    },
+    {
+      "relationship": "Sister & Jiju",
+      "names": [
+        [
+          "Priya",
+          "Anurag"
+        ]
+      ]
+    },
+    {
+      "relationship": "Cousins",
+      "names": [
+        [
+          "Priyanka Kushwaha"
+        ],
+        [
+          "Abhishek Kushwaha",
+          "Prajakta Kushwaha"
+        ],
+        [
+          "Anubhav Kushwaha",
+          "Ananya Kushwaha"
+        ],
+        [
+          "Princy Kushwaha",
+          "Ansh Kushwaha"
+        ]
+      ]
+    }
+  ]
+}

@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en-IN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#642b3b">
+  <meta name="description" content="A wedding invitation celebrating Rohan and Anju.">
+  <title>Rohan &amp; Anju — The Wedding Journey</title>
+  <link rel="stylesheet" href="style.css?v=25">
+  <script src="script.js?v=27" defer></script>
+</head>
+<body>
+  <div class="intro-gate" id="introGate" role="dialog" aria-modal="true" aria-label="Wedding invitation opening video">
+    <video class="launch-video-backdrop" id="launchVideoBackdrop" muted playsinline preload="auto" aria-hidden="true" tabindex="-1">
+      <source src="assets/Video/Launch.mp4" type="video/mp4">
+    </video>
+    <video class="launch-video" id="launchVideo" muted playsinline preload="auto" aria-label="Wedding invitation opening video">
+      <source src="assets/Video/Launch.mp4" type="video/mp4">
+      Your browser does not support video playback.
+    </video>
+    <button class="skip-launch-button" id="skipLaunchButton" type="button">Skip</button>
+    <div class="intro-video-controls">
+      <p class="visually-hidden" id="launchVideoStatus" role="status" aria-live="polite" hidden></p>
+      <button class="button button-gold" id="continueButton" type="button" hidden>Open the invitation</button>
+    </div>
+  </div>
+
+  <div class="hearts hearts--fixed" data-hearts aria-hidden="true"></div>
+  <audio id="backgroundMusic" src="assets/music/invitation.mp3" preload="none" loop></audio>
+  <p class="visually-hidden" id="musicStatus" role="status" aria-live="polite"></p>
+  <button class="music-toggle is-muted" id="musicToggle" type="button" aria-pressed="false" aria-label="Play music" title="Play music">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M9 18V5l12-2v13"></path>
+      <circle cx="6" cy="18" r="3"></circle>
+      <circle cx="18" cy="16" r="3"></circle>
+    </svg>
+    <svg class="music-toggle-slash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <line x1="3" y1="3" x2="21" y2="21"></line>
+    </svg>
+  </button>
+
+  <header class="hero" id="top">
+    <nav class="site-nav" aria-label="Main navigation">
+      <a class="brand" href="#top">R <span>&amp;</span> A</a>
+      <div class="nav-links">
+        <a href="#story">Our story</a>
+        <a href="#celebrations">Celebrations</a>
+        <a href="#wishes">Send wishes</a>
+      </div>
+    </nav>
+    <div class="hero-content">
+      <p class="eyebrow">Together with our families</p>
+      <h1><span id="heroGroomName">Loading…</span> <span class="ampersand">&amp;</span> <span id="heroBrideName">Loading…</span></h1>
+      <p class="hero-subtitle">invite you to celebrate their wedding</p>
+      <p class="hero-date" id="weddingHeroDate">Loading wedding details…</p>
+      <a class="text-link" href="#invitation">Read the invitation <span aria-hidden="true">↓</span></a>
+    </div>
+    <div class="hero-bottom" aria-hidden="true"></div>
+  </header>
+
+  <main class="page-content">
+    <section class="paper-card invitation-card" id="invitation">
+      <div class="hearts hearts--absolute" data-hearts aria-hidden="true"></div>
+      <div class="invite-florals" aria-hidden="true">
+        <img class="invite-floral invite-floral--left" src="assets/images/floral-pattern.svg" width="280" height="280" alt="">
+        <img class="invite-floral invite-floral--right" src="assets/images/floral-pattern.svg" width="280" height="280" alt="">
+      </div>
+      <div class="burst" id="burst" hidden aria-hidden="true"></div>
+      <button class="invite-btn" type="button" id="open-invite">
+        <span>You are invited</span>
+        <svg class="invite-btn__heart" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+        </svg>
+      </button>
+      <p class="sacred-mark" aria-label="Om">ॐ</p>
+      <p class="shloka">वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ।<br>निर्विघ्नं कुरु मे देव शुभ कार्येषु सर्वदा॥</p>
+      <div class="ornament" aria-hidden="true"></div>
+      <h2 class="invitation-script-title">We Cordially Invite You</h2>
+      <p class="intro-copy">Together with our families, we request the honour of your presence to celebrate the wedding of</p>
+      <div class="couple-grid">
+        <article class="person-card">
+          <h3 id="groomName">Loading…</h3>
+          <p class="eyebrow">Son of</p>
+          <p id="groomParents">Loading family details…</p>
+        </article>
+        <div class="couple-connector" aria-hidden="true"><span>With</span></div>
+        <article class="person-card">
+          <h3 id="brideName">Loading…</h3>
+          <p class="eyebrow">Daughter of</p>
+          <p id="brideParents">Loading family details…</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="paper-card scratch-section" aria-labelledby="scratchHeading">
+      <p class="eyebrow">A little surprise</p>
+      <h2 id="scratchHeading">Scratch the heart to reveal our date</h2>
+      <p class="muted">Drag across the heart to uncover our wedding date.</p>
+      <div class="scratch-heart">
+        <div class="scratch-reveal">
+          <span class="eyebrow">Save the date</span>
+          <strong id="weddingScratchDate">Loading…</strong>
+        </div>
+        <canvas id="scratchFoil" width="300" height="300" aria-label="Scratch this card to reveal the wedding date"></canvas>
+      </div>
+      <p class="scratch-caption">Scratch to reveal <span aria-hidden="true">✦</span></p>
+      <div class="scratch-celebration" aria-hidden="true"></div>
+    </section>
+
+    <section class="countdown-section" aria-labelledby="countdownHeading">
+      <p class="eyebrow">The countdown is on</p>
+      <h2 id="countdownHeading">Until the big day</h2>
+      <div class="countdown" aria-live="polite">
+        <div><strong id="days">—</strong><span>Days</span></div>
+        <div><strong id="hours">00</strong><span>Hours</span></div>
+        <div><strong id="minutes">00</strong><span>Minutes</span></div>
+        <div><strong id="seconds">00</strong><span>Seconds</span></div>
+      </div>
+    </section>
+
+    <section class="paper-card story-section" id="story">
+      <p class="eyebrow">Our journey</p>
+      <h2>How forever began</h2>
+      <div class="story-layout">
+        <div class="story-gallery" aria-hidden="true">
+          <img src="assets/images/Our Story/image1.svg" alt="" class="story-art is-active">
+          <img src="assets/images/Our Story/image2.svg" alt="" class="story-art is-next">
+          <img src="assets/images/Our Story/image3.svg" alt="" class="story-art is-previous">
+        </div>
+        <div class="story-copy">
+          <p>Our story did not begin with years of knowing each other. It began with two paths crossing at exactly the right time.</p>
+          <p>From the very beginning, we found comfort in the quiet moments, joy in the unexpected ones, and an ease that made every challenge simpler.</p>
+          <p>As we begin this new chapter, we feel grateful to have found in each other a partner, a best friend, and an adventure companion. We cannot wait to celebrate with everyone!</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="events-section" id="celebrations">
+      <div class="section-heading">
+        <p class="eyebrow">The celebrations</p>
+        <h2>Wedding Events</h2>
+        <p class="muted">We look forward to celebrating with you.</p>
+      </div>
+      <p class="offline-note" id="eventDataStatus" role="status" hidden></p>
+      <div class="event-list" id="eventList" aria-live="polite">
+      </div>
+      <section class="route-journey" id="routeJourney" aria-labelledby="routeJourneyHeading" hidden>
+        <div>
+          <p class="eyebrow">The journey continues</p>
+          <h3 id="routeJourneyHeading">KANDAR <span>to</span> Chhaterpur</h3>
+        </div>
+        <div class="route-endpoints">
+          <p><span>From</span><strong>Kandar</strong></p>
+          <svg class="route-map" viewBox="0 0 220 320" aria-hidden="true">
+            <path class="route-path" d="M 110 18 C 18 70, 202 105, 110 160 S 18 250, 110 302"></path>
+            <path class="route-progress" d="M 110 18 C 18 70, 202 105, 110 160 S 18 250, 110 302"></path>
+            <circle class="route-point" cx="110" cy="18" r="7"></circle>
+            <circle class="route-point" cx="110" cy="302" r="7"></circle>
+            <g class="route-marker" id="routeMarker">
+              <circle r="11"></circle>
+              <circle class="route-marker-center" r="4"></circle>
+            </g>
+          </svg>
+          <p><span>To</span><strong>Chhaterpur</strong></p>
+        </div>
+      </section>
+    </section>
+
+    <section class="blessings-section">
+      <h2>With Blessings From</h2>
+      <div class="blessings-card">
+        <div class="blessings-grid" id="blessingsList">
+          <p>Loading family details…</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="wishes-section" id="wishes">
+      <div class="section-heading">
+        <p class="eyebrow">A note for the journey</p>
+        <h2>Send your blessings</h2>
+        <p class="muted">Leave a warm wish for <span id="wishesCoupleNames">the couple</span>.</p>
+      </div>
+      <form class="wish-form" id="wishForm">
+        <label for="guestName">Your name</label>
+        <input id="guestName" name="guestName" autocomplete="name" maxlength="80" required>
+        <label for="guestCity">Where are you from? <span>(optional)</span></label>
+        <input id="guestCity" name="guestCity" autocomplete="address-level2" maxlength="80">
+        <label for="guestBlessing">Your wishes</label>
+        <textarea id="guestBlessing" name="guestBlessing" rows="4" maxlength="500" required></textarea>
+        <button class="button button-dark" type="submit">Save your wish</button>
+        <p class="privacy-note">Your wish will be saved for the couple to read.</p>
+        <p class="storage-note" id="storageStatus" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <section class="thank-you-card" aria-label="Thank you note">
+      <div class="thank-you-copy">
+        <h2>Thank You</h2>
+        <p>For being part of our journey. Your love and blessings mean the world to us.</p>
+        <p class="thank-you-signoff">
+          With love,<br>
+          <strong><span id="footerGroomName">Loading…</span> &amp; <span id="footerBrideName">Loading…</span></strong>
+        </p>
+      </div>
+      <div class="thank-you-address">
+        <p class="sealed-message">Sealed with love<br>&amp; blessings</p>
+        <div class="thank-you-seal" aria-hidden="true"><span>R&amp;A</span></div>
+        <p class="thank-you-to">To</p>
+        <p class="thank-you-recipient">Our dear family</p>
+        <p class="thank-you-recipient">&amp; friends,</p>
+        <p class="thank-you-recipient">with all our love</p>
+      </div>
+    </section>
+    <a class="back-to-top" href="#top">Back to top ↑</a>
+  </footer>
+</body>
+</html>

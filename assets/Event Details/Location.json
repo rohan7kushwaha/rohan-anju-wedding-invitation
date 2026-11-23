@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "locations": {
+    "groomsHome": {
+      "name": "Groom's Home",
+      "addressLine": "Kandar, Dhuwarjun",
+      "regionLine": "Ghazipur",
+      "mapsUrl": "https://maps.app.goo.gl/tWBABARyvonVzVsc7"
+    },
+    "gardenHouse": {
+      "name": "The Garden House",
+      "addressLine": "MG Road, Jaipur",
+      "regionLine": "Rajasthan, India",
+      "mapsUrl": "https://www.google.com/maps/search/?api=1&query=The+Garden+House%2C+MG+Road%2C+Jaipur"
+    },
+    "bridesHome": {
+      "name": "Bride's Home",
+      "addressLine": "Chhatterpur, Miranpur",
+      "regionLine": "Ghazipur",
+      "mapsUrl": "https://maps.app.goo.gl/E98jCxUD3TPWHyFP9"
+    }
+  }
+}
