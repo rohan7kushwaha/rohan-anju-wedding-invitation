@@ -86,6 +86,7 @@ const launchVideoBackdrop = document.getElementById('launchVideoBackdrop');
 const launchVideoStatus = document.getElementById('launchVideoStatus');
 const continueButton = document.getElementById('continueButton');
 const skipLaunchButton = document.getElementById('skipLaunchButton');
+const launchMusic = document.getElementById('launchMusic');
 const backgroundMusic = document.getElementById('backgroundMusic');
 const musicToggle = document.getElementById('musicToggle');
 const musicStatus = document.getElementById('musicStatus');
@@ -108,7 +109,21 @@ function showContinue(message) {
   launchVideoStatus.hidden = false;
 }
 
+function playLaunchMusic() {
+  if (!launchMusic.paused) return;
+  const playAttempt = launchMusic.play();
+  if (playAttempt) {
+    playAttempt.catch(error => {
+      console.warn('Launch music is waiting for an interaction to start.', error);
+    });
+  }
+}
+
+document.addEventListener('pointerdown', playLaunchMusic, { once: true });
+document.addEventListener('keydown', playLaunchMusic, { once: true });
+
 launchVideo.addEventListener('play', () => {
+  playLaunchMusic();
   const backdropPlayAttempt = launchVideoBackdrop.play();
   if (backdropPlayAttempt) {
     backdropPlayAttempt.catch(error => {
@@ -155,6 +170,8 @@ if (prefersReducedMotion) {
 function openInvitation() {
   launchVideo.pause();
   launchVideoBackdrop.pause();
+  launchMusic.pause();
+  launchMusic.currentTime = 0;
   const shouldPlayMusic = musicPreference !== false;
   backgroundMusic.pause();
   backgroundMusic.src = invitationMusicSource;
