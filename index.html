@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#642b3b">
   <meta name="description" content="Loading wedding invitation details…">
   <title>Loading wedding invitation…</title>
-  <link rel="stylesheet" href="style.css?v=25">
-  <script src="script.js?v=37" defer></script>
+  <link rel="stylesheet" href="style.css?v=27">
+  <script src="script.js?v=39" defer></script>
 </head>
 <body>
-  <audio id="launchMusic" src="assets/music/launch.mp3?v=1" preload="auto" loop muted></audio>
+  <audio id="launchMusic" src="assets/music/launch.mp3?v=1" preload="auto" loop></audio>
   <div class="intro-gate" id="introGate" role="dialog" aria-modal="true" aria-label="Wedding invitation opening video">
     <video class="launch-video-backdrop" id="launchVideoBackdrop" muted playsinline preload="auto" aria-hidden="true" tabindex="-1">
       <source src="assets/Video/Launch.mp4" type="video/mp4">
@@ -19,9 +19,10 @@
       <source src="assets/Video/Launch.mp4" type="video/mp4">
       Your browser does not support video playback.
     </video>
-    <button class="skip-launch-button" id="skipLaunchButton" type="button">Skip</button>
-    <div class="intro-video-controls">
+    <button class="skip-launch-button" id="skipLaunchButton" type="button" hidden>Skip</button>
+    <div class="intro-video-controls intro-video-controls--launch" id="introVideoControls">
       <p class="visually-hidden" id="launchVideoStatus" role="status" aria-live="polite" hidden></p>
+      <button class="button button-gold" id="launchJourneyButton" type="button">Launch the Journey</button>
       <button class="button button-gold" id="continueButton" type="button" hidden>Open the invitation</button>
     </div>
   </div>
@@ -29,7 +30,7 @@
   <div class="hearts hearts--fixed" data-hearts aria-hidden="true"></div>
   <audio id="backgroundMusic" src="assets/music/invitation.mp3" preload="none" loop></audio>
   <p class="visually-hidden" id="musicStatus" role="status" aria-live="polite"></p>
-  <button class="music-toggle is-muted" id="musicToggle" type="button" aria-pressed="false" aria-label="Play music" title="Play music">
+  <button class="music-toggle is-muted" id="musicToggle" type="button" aria-pressed="false" aria-label="Play music" title="Play music" hidden>
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <path d="M9 18V5l12-2v13"></path>
       <circle cx="6" cy="18" r="3"></circle>

@@ -84,6 +84,8 @@ const introGate = document.getElementById('introGate');
 const launchVideo = document.getElementById('launchVideo');
 const launchVideoBackdrop = document.getElementById('launchVideoBackdrop');
 const launchVideoStatus = document.getElementById('launchVideoStatus');
+const launchJourneyButton = document.getElementById('launchJourneyButton');
+const introVideoControls = document.getElementById('introVideoControls');
 const continueButton = document.getElementById('continueButton');
 const skipLaunchButton = document.getElementById('skipLaunchButton');
 const launchMusic = document.getElementById('launchMusic');
@@ -93,6 +95,7 @@ const musicStatus = document.getElementById('musicStatus');
 const invitationMusicSource = 'assets/music/invitation.mp3';
 let musicPreference = null;
 let launchMusicLocked = false;
+let launchStarted = false;
 const pageContent = [...document.body.children].filter(element =>
   element !== introGate && element !== musicToggle
 );
@@ -106,52 +109,55 @@ pageContent.forEach(element => {
 
 function showContinue(message) {
   skipLaunchButton.hidden = true;
+  launchJourneyButton.hidden = true;
   continueButton.hidden = false;
   launchVideoStatus.textContent = message;
   launchVideoStatus.hidden = false;
 }
 
 function playLaunchMusic() {
-  if (launchMusicLocked || introGate.classList.contains('is-dismissed')) return;
-  launchMusic.muted = false;
+  if (!launchStarted || launchMusicLocked || introGate.classList.contains('is-dismissed')) return;
   if (!backgroundMusic.paused) backgroundMusic.pause();
   if (!launchMusic.paused) return;
   const playAttempt = launchMusic.play();
   if (playAttempt) {
-    playAttempt.then(() => {
-      if (launchMusicLocked) {
-        launchMusic.pause();
-        launchMusic.currentTime = 0;
-      }
-    });
     playAttempt.catch(error => {
-      console.warn('Launch music is waiting for an interaction to start.', error);
+      console.error('Unable to play launch music.', error);
     });
   }
 }
 
-function startLaunchMusicAutomatically() {
-  if (launchMusicLocked || introGate.classList.contains('is-dismissed')) return;
-  launchMusic.muted = true;
-  const playAttempt = launchMusic.play();
-  if (playAttempt) {
-    playAttempt.catch(error => {
-      console.warn('Launch music will start after the first user interaction.', error);
+function startLaunchJourney() {
+  if (launchStarted || launchMusicLocked) return;
+  launchStarted = true;
+  launchJourneyButton.hidden = true;
+  skipLaunchButton.hidden = false;
+  musicToggle.hidden = false;
+  introVideoControls.classList.remove('intro-video-controls--launch');
+  launchVideoStatus.hidden = true;
+
+  const musicAttempt = launchMusic.play();
+  if (musicAttempt) {
+    musicAttempt.catch(error => {
+      console.error('Unable to play launch music.', error);
+    });
+  }
+
+  if (prefersReducedMotion) {
+    showContinue('Opening video skipped because reduced motion is enabled. Open the invitation to continue.');
+    return;
+  }
+
+  const videoAttempt = launchVideo.play();
+  if (videoAttempt) {
+    videoAttempt.catch(error => {
+      console.error('Unable to play the wedding opening video.', error);
+      showContinue('The opening video could not be played. Open the invitation to continue.');
     });
   }
 }
-
-document.addEventListener('pointerdown', () => {
-  launchMusic.muted = false;
-  playLaunchMusic();
-}, { once: true });
-document.addEventListener('keydown', () => {
-  launchMusic.muted = false;
-  playLaunchMusic();
-}, { once: true });
 
 launchVideo.addEventListener('play', () => {
-  startLaunchMusicAutomatically();
   const backdropPlayAttempt = launchVideoBackdrop.play();
   if (backdropPlayAttempt) {
     backdropPlayAttempt.catch(error => {
@@ -177,25 +183,6 @@ launchVideo.addEventListener('error', () => {
   console.error('Unable to load the wedding opening video.', launchVideo.error);
   showContinue('The opening video could not be played. Open the invitation to continue.');
 });
-
-startLaunchMusicAutomatically();
-
-if (prefersReducedMotion) {
-  showContinue('Reduced motion is enabled. Open the invitation when ready.');
-} else {
-  const playAttempt = launchVideo.play();
-  if (playAttempt) {
-    playAttempt.catch(error => {
-      if (error.name === 'NotAllowedError') {
-        showContinue('Video playback was blocked. Open the invitation when ready.');
-        return;
-      }
-
-      console.error('Unable to play the wedding opening video.', error);
-      showContinue('The opening video could not be played. Open the invitation to continue.');
-    });
-  }
-}
 
 function openInvitation() {
   launchMusicLocked = true;
@@ -320,6 +307,7 @@ backgroundMusic.addEventListener('error', () => {
   console.error('Unable to load background music from assets/music/invitation.mp3.', backgroundMusic.error);
 });
 
+launchJourneyButton.addEventListener('click', startLaunchJourney);
 continueButton.addEventListener('click', openInvitation);
 function seekToLastFrame(video, onSeeked) {
   function seekWhenDurationIsReady() {
