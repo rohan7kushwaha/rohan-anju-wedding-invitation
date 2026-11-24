@@ -65,9 +65,14 @@ class WeddingServerTests(unittest.TestCase):
         with self.request(self.public_server, "/") as response:
             self.assertEqual(response.status, 200)
             response_body = response.read()
-            self.assertIn(b'id="brandNames"', response_body)
+            self.assertIn(b'assets/images/logo.jpeg', response_body)
             self.assertIn(b'id="heroGroomName"', response_body)
+            self.assertNotIn(b'id="weddingHeroDate"', response_body)
             self.assertIn(b"assets/images/Our Story/image1.jpeg", response_body)
+
+        with self.request(self.public_server, "/assets/images/logo.jpeg") as response:
+            self.assertEqual(response.status, 200)
+            self.assertEqual(response.headers.get_content_type(), "image/jpeg")
 
         for image_number in range(1, 4):
             image_path = f"/assets/images/Our%20Story/image{image_number}.jpeg"
@@ -82,6 +87,23 @@ class WeddingServerTests(unittest.TestCase):
                     self.request(self.public_server, path)
                 self.assertEqual(error.exception.code, 404)
                 error.exception.close()
+
+    def test_reception_event_and_video_are_available_on_public_port(self):
+        with self.request(self.public_server, "/assets/event-details/EventDate.json") as response:
+            event_data = json.loads(response.read())
+
+        reception = next(event for event in event_data["events"] if event["id"] == "reception")
+        self.assertEqual(reception["name"], "Reception")
+        self.assertEqual(reception["date"], "2026-12-27")
+        self.assertEqual(reception["time"], "17:00")
+        self.assertEqual(reception["timeLabel"], "5 PM onwards")
+        self.assertEqual(reception["locationId"], "groomsHome")
+        self.assertEqual(reception["video"], "assets/Video/Reception.mp4")
+
+        with self.request(self.public_server, "/assets/Video/Reception.mp4") as response:
+            self.assertEqual(response.status, 200)
+            self.assertEqual(response.headers.get_content_type(), "video/mp4")
+            self.assertGreater(len(response.read()), 0)
 
     def test_guest_wish_is_stored_and_visible_only_on_admin_port(self):
         submission = {

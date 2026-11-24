@@ -117,7 +117,20 @@ body.intro-locked { overflow: hidden; }
   padding: 1.4rem 0;
 }
 
-.brand { color: var(--burgundy); font-size: 1.35rem; text-decoration: none; }
+.brand {
+  display: inline-flex;
+  width: 3.5rem;
+  aspect-ratio: 1;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid #d6bd82;
+  border-radius: 50%;
+  background: #fbf5e9;
+  box-shadow: 0 3px 12px rgb(52 34 25 / 14%);
+}
+.brand img { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.45); }
+.brand:focus-visible { outline: 3px solid #d9b976; outline-offset: 3px; }
 .nav-links { display: flex; gap: clamp(1rem, 3vw, 2.5rem); }
 .nav-links a { color: #684c43; font-size: 0.82rem; text-decoration: none; }
 .nav-links a:hover, .nav-links a:focus-visible { color: var(--gold-pale); text-decoration: underline; }
@@ -148,7 +161,6 @@ body.intro-locked { overflow: hidden; }
 .eyebrow { margin-bottom: 0.5rem; color: var(--burgundy); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; }
 .hero .eyebrow { color: #96785f; }
 .hero-subtitle { margin: 1.4rem 0 0.5rem; color: #674a43; font-family: var(--serif); font-size: clamp(1.15rem, 3vw, 1.6rem); font-style: italic; }
-.hero-date { margin-bottom: 2rem; color: #866038; font-size: 0.82rem; letter-spacing: 0.11em; text-transform: uppercase; }
 .text-link { color: #f2e7dc; font-size: 0.76rem; letter-spacing: 0.08em; text-decoration: none; text-transform: uppercase; }
 .hero .text-link { color: var(--burgundy); }
 .text-link span { display: inline-block; margin-left: 0.35rem; animation: scroll-cue 1.8s ease-in-out infinite; }
@@ -643,18 +655,18 @@ body.motion-enabled .scroll-reveal.is-visible .scroll-reveal-text { opacity: 1; 
   top: 1.2rem;
   right: 1.2rem;
   display: grid;
-  width: 58px;
-  height: 58px;
+  width: 68px;
+  height: 68px;
   place-items: center;
-  border: 5px double #e8c9a0;
+  overflow: hidden;
+  border: 3px double #e8c9a0;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #a84d54, #6f1d2b 68%);
+  background: #fbf5e9;
   box-shadow: 0 4px 10px rgb(76 31 39 / 24%);
-  color: #f2d79a;
   transform: rotate(-8deg);
 }
-.thank-you-seal span { font-family: var(--serif); font-size: 0.72rem; letter-spacing: 0.04em; }
-.sealed-message { padding-right: 64px; }
+.thank-you-seal img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.45); }
+.sealed-message { padding-right: 76px; }
 .thank-you-to { width: 100%; margin: 0.5rem 0 0.15rem !important; color: #a58f65; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; }
 .thank-you-recipient { width: 100%; margin: 0.12rem 0 !important; border-bottom: 1px solid #d8cbb7; font-family: "Segoe Script", "Brush Script MT", cursive; font-size: clamp(1.05rem, 3vw, 1.4rem); font-style: italic; line-height: 1.5; }
 .back-to-top { margin-top: 0.2rem; color: #dccbb5; font-size: 0.78rem; text-decoration: none; }
@@ -670,6 +682,7 @@ body.motion-enabled .scroll-reveal.is-visible .scroll-reveal-text { opacity: 1; 
   .hero::before { left: -0.5rem; }
   .hero::after { right: -0.5rem; }
   .site-nav { width: calc(100% - 2rem); }
+  .brand { width: 3rem; }
   .nav-links { gap: 0.8rem; }
   .nav-links a { font-size: 0.68rem; }
   .hero-content { padding-bottom: 9rem; }
@@ -678,8 +691,8 @@ body.motion-enabled .scroll-reveal.is-visible .scroll-reveal-text { opacity: 1; 
   .thank-you-copy { min-height: 190px; padding: 1.2rem 1.1rem; border-right: 0; border-bottom: 1px solid #ddd0bd; text-align: center; }
   .thank-you-copy > p { margin-right: auto; margin-left: auto; }
   .thank-you-address { min-height: 210px; padding: 1.2rem 1.1rem; }
-  .thank-you-seal { top: 0.9rem; right: 0.8rem; width: 50px; height: 50px; }
-  .sealed-message { padding-right: 58px; }
+  .thank-you-seal { top: 0.9rem; right: 0.8rem; width: 60px; height: 60px; }
+  .sealed-message { padding-right: 68px; }
   .story-layout { grid-template-columns: 1fr; gap: 1rem; }
   .story-gallery { height: clamp(320px, 80vw, 420px); }
   .story-art { width: min(68%, 280px); }

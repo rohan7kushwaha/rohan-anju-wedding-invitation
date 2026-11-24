@@ -37,6 +37,15 @@
       "timeLabel": "6:00 PM onwards",
       "locationId": "bridesHome",
       "video": "assets/Video/wedding.mp4"
+    },
+    {
+      "id": "reception",
+      "name": "Reception",
+      "date": "2026-12-27",
+      "time": "17:00",
+      "timeLabel": "5 PM onwards",
+      "locationId": "groomsHome",
+      "video": "assets/Video/Reception.mp4"
     }
   ]
 }

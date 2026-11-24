@@ -601,8 +601,6 @@ function renderFamily(members) {
     `Wedding invitation and celebration details for ${members.groom.name} and ${members.bride.name}.`;
   document.getElementById('heroGroomName').textContent = members.groom.name;
   document.getElementById('heroBrideName').textContent = members.bride.name;
-  document.getElementById('brandNames').textContent =
-    `${members.groom.name.charAt(0)} & ${members.bride.name.charAt(0)}`;
   document.getElementById('groomName').textContent = members.groom.name;
   document.getElementById('groomParents').textContent = members.groom.parents.join(' & ');
   document.getElementById('brideName').textContent = members.bride.name;
@@ -610,9 +608,6 @@ function renderFamily(members) {
   document.getElementById('footerGroomName').textContent = members.groom.name;
   document.getElementById('footerBrideName').textContent = members.bride.name;
   document.getElementById('wishesCoupleNames').textContent = `${members.groom.name} and ${members.bride.name}`;
-  document.querySelector('.thank-you-seal span').textContent =
-    `${members.groom.name.charAt(0)}&${members.bride.name.charAt(0)}`;
-
   const blessings = document.getElementById('blessingsList');
   blessings.replaceChildren();
   members.blessings.forEach((group, index) => {
@@ -633,8 +628,6 @@ function renderFamily(members) {
 }
 
 function renderWeddingDate(wedding) {
-  const dateText = formatEventDate(wedding.date);
-  document.getElementById('weddingHeroDate').textContent = dateText;
   document.getElementById('weddingScratchDate').textContent =
     wedding.date ? formatEventDate(wedding.date, { year: 'numeric', month: 'short', day: 'numeric' }).toUpperCase() : 'DATE TO BE ANNOUNCED';
 
