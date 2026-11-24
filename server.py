@@ -1,16 +1,18 @@
 import argparse
-import base64
 import hmac
 import ipaddress
 import json
 import logging
 import os
+import secrets
 import sqlite3
 import sys
 import threading
+import time
 from contextlib import closing
 from datetime import datetime, timezone
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from http.cookies import CookieError, SimpleCookie
 from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
@@ -23,6 +25,7 @@ from wedding.config import database_path_from_environment, load_local_environmen
 from wedding.database import initialize_database
 
 MAX_REQUEST_BYTES = 8192
+ADMIN_SESSION_SECONDS = 8 * 60 * 60
 NOT_PUBLIC_FILE = PROJECT_ROOT / "__not_public__"
 
 
@@ -99,13 +102,17 @@ class WeddingRequestHandler(SimpleHTTPRequestHandler):
         super().do_HEAD()
 
     def do_POST(self):
-        if self.admin_server or urlsplit(self.path).path != "/api/wishes":
+        if self.admin_server:
+            self.handle_admin_post(urlsplit(self.path).path)
+            return
+        if urlsplit(self.path).path != "/api/wishes":
             self.send_error(404)
             return
         self.handle_wish_submission()
 
     def handle_admin_get(self, url_path):
-        if not self.is_authorized_admin():
+        if not self.is_lan_client():
+            self.send_error(403)
             return
 
         if url_path in ("/", "/admin", "/admin.html"):
@@ -121,6 +128,9 @@ class WeddingRequestHandler(SimpleHTTPRequestHandler):
             return
 
         if url_path == "/api/admin/wishes":
+            if not self.is_authorized_admin():
+                self.send_json({"error": "Admin sign-in is required."}, status=401)
+                return
             if self.headers.get("X-Admin-Request") != "1":
                 self.send_error(403)
                 return
@@ -134,6 +144,79 @@ class WeddingRequestHandler(SimpleHTTPRequestHandler):
             return
 
         self.send_error(404)
+
+    def handle_admin_post(self, url_path):
+        if not self.is_lan_client():
+            self.send_error(403)
+            return
+        if self.headers.get("X-Admin-Request") != "1":
+            self.send_error(403)
+            return
+        if url_path == "/api/admin/login":
+            self.handle_admin_login()
+        elif url_path == "/api/admin/logout":
+            self.handle_admin_logout()
+        else:
+            self.send_error(404)
+
+    def handle_admin_login(self):
+        if self.headers.get_content_type() != "application/json":
+            self.send_json({"error": "Submit the password as JSON."}, status=415)
+            return
+
+        try:
+            content_length = int(self.headers.get("Content-Length", ""))
+        except ValueError:
+            self.send_json({"error": "A valid Content-Length header is required."}, status=400)
+            return
+        if content_length < 1:
+            self.send_json({"error": "The request body is empty."}, status=400)
+            return
+        if content_length > MAX_REQUEST_BYTES:
+            self.send_json({"error": "The request is too large."}, status=413)
+            return
+
+        try:
+            credentials = json.loads(self.rfile.read(content_length).decode("utf-8"))
+            if not isinstance(credentials, dict) or not isinstance(credentials.get("password"), str):
+                raise ValueError("A password is required.")
+        except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
+            self.send_json({"error": str(error)}, status=400)
+            return
+
+        if not hmac.compare_digest(credentials["password"], self.server.admin_password):
+            self.send_json({"error": "Invalid admin password."}, status=401)
+            return
+
+        session_id = secrets.token_urlsafe(32)
+        with self.server.admin_sessions_lock:
+            now = time.monotonic()
+            self.server.admin_sessions = {
+                token: expires_at
+                for token, expires_at in self.server.admin_sessions.items()
+                if expires_at > now
+            }
+            self.server.admin_sessions[session_id] = now + ADMIN_SESSION_SECONDS
+
+        self.send_json(
+            {"ok": True},
+            headers={
+                "Set-Cookie": (
+                    f"wedding_admin_session={session_id}; Path=/; Max-Age={ADMIN_SESSION_SECONDS}; "
+                    "HttpOnly; SameSite=Strict"
+                )
+            },
+        )
+
+    def handle_admin_logout(self):
+        session_id = self.admin_session_id()
+        if session_id:
+            with self.server.admin_sessions_lock:
+                self.server.admin_sessions.pop(session_id, None)
+        self.send_json(
+            {"ok": True},
+            headers={"Set-Cookie": "wedding_admin_session=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict"},
+        )
 
     def handle_wish_submission(self):
         if self.headers.get_content_type() != "application/json":
@@ -191,20 +274,27 @@ class WeddingRequestHandler(SimpleHTTPRequestHandler):
         return address.is_loopback or address.is_private
 
     def is_authorized_admin(self):
-        if not self.is_lan_client():
-            self.send_error(403)
+        session_id = self.admin_session_id()
+        if not session_id:
             return False
 
-        password = self.server.admin_password.encode("utf-8")
-        expected = "Basic " + base64.b64encode(b"admin:" + password).decode("ascii")
-        supplied = self.headers.get("Authorization", "")
-        if not hmac.compare_digest(supplied, expected):
-            self.send_response(401)
-            self.send_header("WWW-Authenticate", 'Basic realm="Wedding wishes admin"')
-            self.send_header("Cache-Control", "no-store")
-            self.end_headers()
-            return False
+        with self.server.admin_sessions_lock:
+            expires_at = self.server.admin_sessions.get(session_id)
+            if expires_at is None:
+                return False
+            if expires_at <= time.monotonic():
+                del self.server.admin_sessions[session_id]
+                return False
         return True
+
+    def admin_session_id(self):
+        cookies = SimpleCookie()
+        try:
+            cookies.load(self.headers.get("Cookie", ""))
+        except CookieError:
+            return None
+        cookie = cookies.get("wedding_admin_session")
+        return cookie.value if cookie else None
 
     def load_wishes(self):
         with closing(sqlite3.connect(self.server.database_path, timeout=10)) as connection:
@@ -214,16 +304,18 @@ class WeddingRequestHandler(SimpleHTTPRequestHandler):
             ).fetchall()
         return [dict(row) for row in rows]
 
-    def send_json(self, payload, status=200):
+    def send_json(self, payload, status=200, headers=None):
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-        self.send_bytes(body, "application/json; charset=utf-8", status)
+        self.send_bytes(body, "application/json; charset=utf-8", status, headers)
 
-    def send_bytes(self, body, content_type, status=200):
+    def send_bytes(self, body, content_type, status=200, headers=None):
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Cache-Control", "no-store")
         self.send_header("X-Content-Type-Options", "nosniff")
+        for name, value in (headers or {}).items():
+            self.send_header(name, value)
         self.end_headers()
         self.wfile.write(body)
 
@@ -239,6 +331,8 @@ class WeddingHTTPServer(ThreadingHTTPServer):
     def __init__(self, address, handler, database_path, admin_password=""):
         self.database_path = database_path
         self.admin_password = admin_password
+        self.admin_sessions = {}
+        self.admin_sessions_lock = threading.Lock()
         super().__init__(address, handler)
 
 

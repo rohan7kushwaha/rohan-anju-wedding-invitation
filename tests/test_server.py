@@ -1,4 +1,3 @@
-import base64
 import json
 import tempfile
 import threading
@@ -49,12 +48,33 @@ class WeddingServerTests(unittest.TestCase):
         request = Request(url, data=body, headers=headers or {}, method=method)
         return urlopen(request, timeout=3)
 
+    def admin_session(self, password="a-test-admin-password-that-is-long"):
+        with self.request(
+            self.admin_server,
+            "/api/admin/login",
+            data={"password": password},
+            headers={
+                "Content-Type": "application/json",
+                "X-Admin-Request": "1",
+            },
+            method="POST",
+        ) as response:
+            return response.headers["Set-Cookie"].split(";", 1)[0]
+
     def test_public_port_serves_site_but_not_admin_or_server_files(self):
         with self.request(self.public_server, "/") as response:
             self.assertEqual(response.status, 200)
             response_body = response.read()
             self.assertIn(b'id="brandNames"', response_body)
             self.assertIn(b'id="heroGroomName"', response_body)
+            self.assertIn(b"assets/images/Our Story/image1.jpeg", response_body)
+
+        for image_number in range(1, 4):
+            image_path = f"/assets/images/Our%20Story/image{image_number}.jpeg"
+            with self.subTest(path=image_path):
+                with self.request(self.public_server, image_path) as response:
+                    self.assertEqual(response.status, 200)
+                    self.assertEqual(response.headers.get_content_type(), "image/jpeg")
 
         for path in ("/admin", "/admin.html", "/server.py", "/.env.example", "/api/admin/wishes"):
             with self.subTest(path=path):
@@ -79,11 +99,9 @@ class WeddingServerTests(unittest.TestCase):
             self.assertEqual(response.status, 201)
             self.assertTrue(json.loads(response.read())["ok"])
 
-        authorization = "Basic " + base64.b64encode(
-            b"admin:a-test-admin-password-that-is-long"
-        ).decode("ascii")
+        session_cookie = self.admin_session()
         admin_headers = {
-            "Authorization": authorization,
+            "Cookie": session_cookie,
             "X-Admin-Request": "1",
         }
         with self.request(
@@ -100,28 +118,71 @@ class WeddingServerTests(unittest.TestCase):
         self.assertEqual(error.exception.code, 404)
         error.exception.close()
 
-    def test_admin_requires_password_and_request_header(self):
-        with self.assertRaises(HTTPError) as page_unauthenticated:
-            self.request(self.admin_server, "/admin")
-        self.assertEqual(page_unauthenticated.exception.code, 401)
-        page_unauthenticated.exception.close()
+    def test_admin_requires_session_and_request_header(self):
+        with self.request(self.admin_server, "/admin") as page:
+            self.assertEqual(page.status, 200)
+            self.assertIn(b"Admin sign in", page.read())
 
-        with self.assertRaises(HTTPError) as unauthenticated:
-            self.request(self.admin_server, "/api/admin/wishes", headers={"X-Admin-Request": "1"})
-        self.assertEqual(unauthenticated.exception.code, 401)
-        unauthenticated.exception.close()
+        with self.assertRaises(HTTPError) as wishes_unauthenticated:
+            self.request(
+                self.admin_server,
+                "/api/admin/wishes",
+                headers={"X-Admin-Request": "1"},
+            )
+        self.assertEqual(wishes_unauthenticated.exception.code, 401)
+        wishes_unauthenticated.exception.close()
 
-        authorization = "Basic " + base64.b64encode(
-            b"admin:a-test-admin-password-that-is-long"
-        ).decode("ascii")
-        with self.assertRaises(HTTPError) as missing_header:
-            self.request(self.admin_server, "/api/admin/wishes", headers={"Authorization": authorization})
-        self.assertEqual(missing_header.exception.code, 403)
-        missing_header.exception.close()
+        session_cookie = self.admin_session()
+        with self.assertRaises(HTTPError) as missing_request_header:
+            self.request(
+                self.admin_server,
+                "/api/admin/wishes",
+                headers={"Cookie": session_cookie},
+            )
+        self.assertEqual(missing_request_header.exception.code, 403)
+        missing_request_header.exception.close()
 
-        with self.request(self.admin_server, "/admin", headers={"Authorization": authorization}) as response:
+        with self.request(
+            self.admin_server,
+            "/api/admin/wishes",
+            headers={"Cookie": session_cookie, "X-Admin-Request": "1"},
+        ) as response:
             self.assertEqual(response.status, 200)
-            self.assertIn(b"Saved wedding wishes", response.read())
+
+    def test_admin_logout_invalidates_session_and_clears_cookie(self):
+        session_cookie = self.admin_session()
+        with self.request(
+            self.admin_server,
+            "/api/admin/logout",
+            headers={"Cookie": session_cookie, "X-Admin-Request": "1"},
+            method="POST",
+        ) as response:
+            self.assertEqual(response.status, 200)
+            self.assertIn("Max-Age=0", response.headers["Set-Cookie"])
+
+        with self.assertRaises(HTTPError) as unauthorized:
+            self.request(
+                self.admin_server,
+                "/api/admin/wishes",
+                headers={"Cookie": session_cookie, "X-Admin-Request": "1"},
+            )
+        self.assertEqual(unauthorized.exception.code, 401)
+        unauthorized.exception.close()
+
+    def test_admin_login_rejects_incorrect_password(self):
+        with self.assertRaises(HTTPError) as error:
+            self.request(
+                self.admin_server,
+                "/api/admin/login",
+                data={"password": "incorrect"},
+                headers={
+                    "Content-Type": "application/json",
+                    "X-Admin-Request": "1",
+                },
+                method="POST",
+            )
+        self.assertEqual(error.exception.code, 401)
+        error.exception.close()
 
     def test_invalid_wish_is_rejected(self):
         submission = {"name": "x" * 81, "city": "", "message": "Hello"}

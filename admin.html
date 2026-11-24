@@ -21,6 +21,9 @@
     button { min-height: 2.6rem; padding: 0.6rem 1rem; border: 1px solid #c59b57; border-radius: 999px; background: #642b3b; color: #fffaf0; cursor: pointer; font: inherit; }
     button:hover { background: #4b202d; }
     button:focus-visible { outline: 3px solid #d9b976; outline-offset: 3px; }
+    label { display: block; margin: 1.2rem 0 0.4rem; color: #642b3b; }
+    input { width: min(100%, 24rem); min-height: 2.6rem; padding: 0.6rem 0.8rem; border: 1px solid #cbbdaf; border-radius: 0.4rem; font: inherit; }
+    input:focus-visible { outline: 3px solid #d9b976; outline-offset: 2px; }
     .table-wrap { overflow-x: auto; border: 1px solid #e8dfd3; border-radius: 0.6rem; }
     table { width: 100%; border-collapse: collapse; text-align: left; }
     th, td { padding: 0.75rem; border-bottom: 1px solid #e8dfd3; vertical-align: top; }
@@ -37,24 +40,47 @@
   <main>
     <h1>Saved wedding wishes</h1>
     <p class="note">Admin access is limited to this server's local network. Keep this page and its password private.</p>
-    <div class="toolbar">
-      <button id="refreshWishes" type="button">Refresh wishes</button>
-      <button id="exportWishes" type="button">Export CSV</button>
-    </div>
-    <p id="status" role="status" aria-live="polite">Loading wishes…</p>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>Date</th><th>Name</th><th>City</th><th>Wish</th></tr>
-        </thead>
-        <tbody id="wishRows"></tbody>
-      </table>
-    </div>
+    <section id="signInPanel" aria-labelledby="signInHeading">
+      <h2 id="signInHeading">Admin sign in</h2>
+      <form id="loginForm">
+        <label for="adminPassword">Admin password</label>
+        <input id="adminPassword" name="password" type="password" autocomplete="current-password" required>
+        <div class="toolbar"><button type="submit">Sign in</button></div>
+      </form>
+      <p id="loginStatus" role="status" aria-live="polite"></p>
+    </section>
+    <section id="dashboard" aria-label="Wedding wishes" hidden>
+      <div class="toolbar">
+        <button id="refreshWishes" type="button">Refresh wishes</button>
+        <button id="exportWishes" type="button">Export CSV</button>
+        <button id="logout" type="button">Log out</button>
+      </div>
+      <p id="status" role="status" aria-live="polite">Loading wishes…</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Date</th><th>Name</th><th>City</th><th>Wish</th></tr>
+          </thead>
+          <tbody id="wishRows"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
   <script>
     const status = document.getElementById('status');
+    const loginStatus = document.getElementById('loginStatus');
+    const signInPanel = document.getElementById('signInPanel');
+    const dashboard = document.getElementById('dashboard');
     const wishRows = document.getElementById('wishRows');
     let wishes = [];
+
+    function showSignIn(message) {
+      wishes = [];
+      wishRows.replaceChildren();
+      dashboard.hidden = true;
+      signInPanel.hidden = false;
+      loginStatus.textContent = message;
+    }
 
     async function refreshWishes() {
       status.textContent = 'Loading wishes…';
@@ -63,10 +89,16 @@
           cache: 'no-store',
           headers: { 'X-Admin-Request': '1' }
         });
+        if (response.status === 401) {
+          showSignIn('Your admin session has ended. Please sign in again.');
+          return;
+        }
         if (!response.ok) throw new Error(`Request failed with status ${response.status}.`);
         const result = await response.json();
         if (!Array.isArray(result.wishes)) throw new Error('The server returned an invalid wishes list.');
 
+        signInPanel.hidden = true;
+        dashboard.hidden = false;
         wishes = result.wishes;
         wishRows.replaceChildren();
         wishes.forEach(wish => {
@@ -81,8 +113,56 @@
         });
         status.textContent = wishes.length === 1 ? '1 wish saved.' : `${wishes.length} wishes saved.`;
       } catch (error) {
-        status.textContent = 'Could not load wishes. Check the server connection and admin sign-in.';
+        signInPanel.hidden = true;
+        dashboard.hidden = false;
+        status.textContent = 'Could not load wishes. Check the server connection.';
         console.error('Unable to load wedding wishes.', error);
+      }
+    }
+
+    async function signIn(event) {
+      event.preventDefault();
+      loginStatus.textContent = 'Signing in…';
+      const passwordInput = document.getElementById('adminPassword');
+      try {
+        const response = await fetch('/api/admin/login', {
+          method: 'POST',
+          cache: 'no-store',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Admin-Request': '1'
+          },
+          body: JSON.stringify({ password: passwordInput.value })
+        });
+        if (response.status === 401) {
+          loginStatus.textContent = 'Incorrect admin password.';
+          passwordInput.select();
+          return;
+        }
+        if (!response.ok) throw new Error(`Request failed with status ${response.status}.`);
+        passwordInput.value = '';
+        loginStatus.textContent = '';
+        await refreshWishes();
+      } catch (error) {
+        loginStatus.textContent = 'Could not sign in. Check the server connection and try again.';
+        console.error('Unable to sign in to the admin dashboard.', error);
+      }
+    }
+
+    async function signOut() {
+      status.textContent = 'Signing out…';
+      try {
+        const response = await fetch('/api/admin/logout', {
+          method: 'POST',
+          cache: 'no-store',
+          headers: { 'X-Admin-Request': '1' }
+        });
+        if (!response.ok) throw new Error(`Request failed with status ${response.status}.`);
+        showSignIn('You have been signed out.');
+        document.getElementById('adminPassword').focus();
+      } catch (error) {
+        status.textContent = 'Could not sign out. Check the server connection and try again.';
+        console.error('Unable to sign out of the admin dashboard.', error);
       }
     }
 
@@ -112,6 +192,8 @@
 
     document.getElementById('refreshWishes').addEventListener('click', refreshWishes);
     document.getElementById('exportWishes').addEventListener('click', exportWishes);
+    document.getElementById('loginForm').addEventListener('submit', signIn);
+    document.getElementById('logout').addEventListener('click', signOut);
     refreshWishes();
   </script>
 </body>
