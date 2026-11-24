@@ -44,6 +44,22 @@ if (revealObserver) {
   observeForReveal(document.querySelector('.blessings-section h2'));
 }
 
+function revealElementsInView() {
+  if (!revealObserver) return;
+  document.querySelectorAll('.scroll-reveal:not(.is-visible)').forEach(element => {
+    const bounds = element.getBoundingClientRect();
+    if (bounds.top < window.innerHeight * 0.92 && bounds.bottom > 0) {
+      element.classList.add('is-visible');
+      revealObserver.unobserve(element);
+    }
+  });
+}
+
+window.addEventListener('scroll', revealElementsInView, { passive: true });
+window.addEventListener('resize', revealElementsInView);
+window.addEventListener('load', revealElementsInView);
+window.requestAnimationFrame(revealElementsInView);
+
 let heartEffectsStarted = false;
 function createFloatingDecoration(container, delay = 0) {
   const isPetal = Math.random() < 0.35;
@@ -206,6 +222,9 @@ function openInvitation() {
   document.body.classList.remove('intro-locked');
   document.body.classList.add('invitation-opened');
   startHeartEffects();
+  window.requestAnimationFrame(revealElementsInView);
+  window.setTimeout(revealElementsInView, 100);
+  window.setTimeout(revealElementsInView, 600);
   window.setTimeout(() => introGate.remove(), 550);
 }
 
