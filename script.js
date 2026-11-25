@@ -390,18 +390,30 @@ function initializeJourneyAnimation(section) {
   const marker = document.getElementById('routeMarker');
   const pathLength = path.getTotalLength();
   let framePending = false;
+  let previousScrollY = window.scrollY;
+  let movingBackward = false;
 
   progressPath.style.strokeDasharray = `${pathLength}`;
 
   function updateProgress() {
     framePending = false;
+    if (window.scrollY < previousScrollY) movingBackward = true;
+    else if (window.scrollY > previousScrollY) movingBackward = false;
+    previousScrollY = window.scrollY;
+
     const bounds = section.getBoundingClientRect();
     const progress = prefersReducedMotion
       ? 1
       : Math.max(0, Math.min(1, (window.innerHeight - bounds.top) / (window.innerHeight + bounds.height)));
-    const point = path.getPointAtLength(pathLength * progress);
+    const distance = pathLength * progress;
+    const point = path.getPointAtLength(distance);
+    const tangentDistance = progress >= 1 ? Math.max(0, distance - 1) : Math.min(pathLength, distance + 1);
+    const tangent = path.getPointAtLength(tangentDistance);
+    const direction = progress >= 1 ? 1 : -1;
+    let angle = Math.atan2((point.y - tangent.y) * direction, (point.x - tangent.x) * direction) * 180 / Math.PI - 90;
+    if (movingBackward) angle += 180;
     progressPath.style.strokeDashoffset = `${pathLength * (1 - progress)}`;
-    marker.setAttribute('transform', `translate(${point.x} ${point.y})`);
+    marker.setAttribute('transform', `translate(${point.x} ${point.y}) rotate(${angle})`);
   }
 
   function scheduleProgressUpdate() {

@@ -131,9 +131,15 @@ body.intro-locked { overflow: hidden; }
 }
 .brand img { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.45); }
 .brand:focus-visible { outline: 3px solid #d9b976; outline-offset: 3px; }
-.nav-links { display: flex; gap: clamp(1rem, 3vw, 2.5rem); }
+.nav-links { display: flex; gap: clamp(1rem, 3vw, 2.5rem); margin-left: auto; }
 .nav-links a { color: #684c43; font-size: 0.82rem; text-decoration: none; }
 .nav-links a:hover, .nav-links a:focus-visible { color: var(--gold-pale); text-decoration: underline; }
+.hero .hero-brand {
+  display: flex;
+  width: 4rem;
+  margin: 2rem auto 0;
+  animation: hero-brand-pulse 3s ease-in-out infinite;
+}
 
 .hero-content {
   position: relative;
@@ -166,12 +172,6 @@ body.intro-locked { overflow: hidden; }
 .text-link span { display: inline-block; margin-left: 0.35rem; animation: scroll-cue 1.8s ease-in-out infinite; }
 .hero-bottom { position: absolute; right: -5%; bottom: -3.8rem; left: -5%; height: 7rem; border-radius: 50% 50% 0 0; background: var(--cream); }
 body.invitation-opened .hero-content { animation: hero-enter 900ms ease-out both; }
-body.invitation-opened .hero h1 > span { animation: name-enter 850ms ease-out both; }
-body.invitation-opened .hero h1 > span:first-child { animation-delay: 120ms; }
-body.invitation-opened .hero h1 > .ampersand {
-  animation: name-enter 850ms ease-out 300ms both, ampersand-float 3.4s ease-in-out 1.15s infinite;
-}
-body.invitation-opened .hero h1 > span:last-child { animation-delay: 480ms; }
 
 @keyframes scratch-heart-float {
   0%, 100% { transform: translateY(0); }
@@ -201,15 +201,14 @@ body.invitation-opened .hero h1 > span:last-child { animation-delay: 480ms; }
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-8px); }
 }
+@keyframes hero-brand-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 3px 12px rgb(52 34 25 / 14%); }
+  50% { transform: scale(1.06); box-shadow: 0 0 0 7px rgb(197 155 87 / 12%), 0 6px 20px rgb(52 34 25 / 20%); }
+}
 @keyframes hero-enter {
   from { opacity: 0; transform: translateY(18px); }
   to { opacity: 1; transform: translateY(0); }
 }
-@keyframes name-enter {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
 .page-content { display: grid; width: min(860px, calc(100% - 2rem)); gap: 5rem; margin: 0 auto; padding: 2.2rem 0 6rem; }
 body.motion-enabled .scroll-reveal {
   opacity: 0;
@@ -510,8 +509,10 @@ body.motion-enabled .scroll-reveal.is-visible .scroll-reveal-text { opacity: 1; 
 .route-path { stroke: #e8dfd3; }
 .route-progress { stroke: var(--gold); }
 .route-point { fill: var(--burgundy); }
-.route-marker { fill: var(--burgundy); stroke: var(--paper); stroke-width: 3; }
-.route-marker-center { fill: var(--gold-pale); stroke: none; }
+.route-car-wheel { fill: var(--ink); }
+.route-car-body { fill: var(--burgundy); stroke: var(--burgundy-dark); stroke-width: 1; }
+.route-car-window { fill: var(--paper); }
+.route-car-headlight { fill: #ffdf80; }
 .route-endpoints { display: grid; width: min(100%, 620px); justify-items: center; gap: 0.15rem; margin-top: -0.5rem; }
 .route-endpoints p { display: grid; gap: 0.15rem; margin: 0; text-align: center; }
 .route-endpoints span { color: var(--muted); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; }
